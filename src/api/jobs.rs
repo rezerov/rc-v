@@ -1,7 +1,7 @@
 use axum::{
     Json, Router,
-    extract::State,
-    routing::{get, post},
+    extract::{Path, State},
+    routing::get,
 };
 
 use crate::{
@@ -23,10 +23,18 @@ async fn list_jobs(State(state): State<AppState>) -> Json<Vec<Job>> {
 async fn create_job(
     State(state): State<AppState>,
     Json(new): Json<NewJob>,
-) -> Result<(), JobError> {
+) -> Result<Json<Job>, JobError> {
     let job: Job = Job {
         id: new.id,
         name: String::from(new.name),
     };
-    Ok(state.push(job))
+    state.push(job.clone());
+    Ok(Json(job))
+}
+
+async fn get_job(
+    State(state): State<AppState>,
+    Path(id): Path<u64>,
+) -> Result<Json<Job>, JobError> {
+    Ok(Json(state.find_by_id(id)?))
 }
