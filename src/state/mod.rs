@@ -1,9 +1,9 @@
 use crate::Job;
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc, RwLock};
 
 #[derive(Clone, Default)]
 pub struct AppState {
-    jobs: Arc<Mutex<Vec<Job>>>,
+    jobs: Arc<RwLock<Vec<Job>>>,
 }
 
 impl AppState {
@@ -12,10 +12,10 @@ impl AppState {
     }
 
     pub fn list(&self) -> Vec<Job> {
-        self.jobs.lock().unwrap().clone()
+        self.jobs.read().unwrap().clone()
     }
 
     pub fn push(&self, job: Job) {
-        self.jobs.lock().unwrap().push(job);
+        self.jobs.write().unwrap().push(job);
     }
 }
