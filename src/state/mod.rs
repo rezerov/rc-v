@@ -15,8 +15,16 @@ impl AppState {
         self.jobs.read().unwrap().clone()
     }
 
-    pub fn push(&self, job: Job) {
-        self.jobs.write().unwrap().push(job);
+    pub fn push(&self, job: Job) -> Result<(), JobError> {
+        let mut jobs = self.jobs.write().map_err(|_| JobError::LockPoisoned)?;
+
+        // Check if job already exists
+        if jobs.iter().any(|j| j.id == job.id) {
+            return Err(JobError::JobIdAlreadyExists);
+        }
+
+        jobs.push(job);
+        Ok(())
     }
 
     pub fn find_by_id(&self, id: u64) -> Result<Job, JobError> {

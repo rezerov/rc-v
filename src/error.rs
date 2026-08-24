@@ -6,16 +6,21 @@ use axum::{
 use serde_json::json;
 use thiserror::Error;
 
+use crate::error::JobError::JobIdAlreadyExists;
+
 #[derive(Debug, Error)]
 pub enum JobError {
     #[error("Job not found")]
     NotFound(u64),
 
-    #[error("job state lock was poisoned")]
+    #[error("Job state lock was poisoned")]
     LockPoisoned,
 
-    #[error("failed to write job")]
+    #[error("Failed to write job")]
     JobWriteError,
+
+    #[error("Job ID already exists")]
+    JobIdAlreadyExists,
 }
 
 impl IntoResponse for JobError {
@@ -24,6 +29,7 @@ impl IntoResponse for JobError {
             JobError::NotFound(_) => StatusCode::NOT_FOUND,
             JobError::LockPoisoned => StatusCode::INTERNAL_SERVER_ERROR,
             JobError::JobWriteError => StatusCode::INTERNAL_SERVER_ERROR,
+            JobError::JobIdAlreadyExists => StatusCode::CONFLICT,
         };
         (status, Json(json!({ "error": self.to_string() }))).into_response()
     }

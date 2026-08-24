@@ -28,7 +28,14 @@ async fn create_job(
         id: new.id,
         name: String::from(new.name),
     };
-    state.push(job.clone());
+
+    // Check if job already exists
+    state
+        .find_by_id(job.id)
+        .is_ok()
+        .then(|| JobError::JobIdAlreadyExists);
+
+    state.push(job.clone())?;
     Ok(Json(job))
 }
 
