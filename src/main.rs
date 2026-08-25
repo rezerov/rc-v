@@ -1,6 +1,7 @@
 mod api;
 mod error;
 mod models;
+mod schema;
 mod state;
 
 #[tokio::main]
